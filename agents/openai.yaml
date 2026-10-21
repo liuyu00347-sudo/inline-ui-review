@@ -1,0 +1,4 @@
+interface:
+  display_name: "对话内 UI 交互审阅"
+  short_description: "按宿主能力提供交互原型或生图审阅，在当前对话收集意见并持续修改"
+  default_prompt: "使用 $inline-ui-review，按当前智能体能力展示可交互 UI 或效果图，并提供真实可用的修改意见反馈方式。"

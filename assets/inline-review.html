@@ -1,0 +1,251 @@
+<style>
+#inline-review-demo-v1 .review-stage { padding: 24px 12px; }
+#inline-review-demo-v1 .packing-app {
+  --packing-surface: light-dark(#ffffff, #202623);
+  --packing-text: light-dark(#203c31, #e1efe7);
+  --packing-soft: light-dark(#f2f6f3, #29352e);
+  --packing-muted: light-dark(#5e7167, #b0c1b6);
+  --packing-line: light-dark(#d8e2dc, #43534a);
+  --packing-accent: light-dark(#245b42, #a0d5b4);
+  --packing-on-accent: light-dark(#ffffff, #1e3528);
+  width: 100%; max-width: 360px; margin: auto; box-sizing: border-box;
+  background: var(--packing-surface); color: var(--packing-text);
+  border: 1px solid var(--packing-line); border-radius: 18px;
+  font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", sans-serif;
+  font-size: 14px; line-height: 1.55; overflow: hidden;
+}
+#inline-review-demo-v1 .packing-app * { box-sizing: border-box; }
+#inline-review-demo-v1 .packing-head { padding: 22px 20px 14px; }
+#inline-review-demo-v1 .packing-name { font-size: 20px; font-weight: 500; }
+#inline-review-demo-v1 .packing-caption { color: var(--packing-muted); margin-top: 4px; }
+#inline-review-demo-v1 .packing-content { padding: 4px 20px 22px; min-height: 226px; }
+#inline-review-demo-v1 .packing-summary { padding: 12px 0; font-weight: 500; }
+#inline-review-demo-v1 .packing-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 0;
+  border-bottom: 1px solid var(--packing-line);
+}
+#inline-review-demo-v1 .packing-item input { width: 20px; height: 20px; accent-color: var(--packing-accent); margin: 0; flex-shrink: 0; }
+#inline-review-demo-v1 .packing-item:has(input:checked) span { color: var(--packing-muted); text-decoration: line-through; }
+#inline-review-demo-v1 .packing-empty { padding: 34px 0; color: var(--packing-muted); }
+#inline-review-demo-v1 .packing-nav { display: flex; gap: 8px; padding: 12px; background: var(--packing-soft); }
+#inline-review-demo-v1 .packing-tab {
+  flex: 1; min-width: 0; min-height: 44px; border: 0; border-radius: 12px;
+  padding: 10px 8px; font: inherit; color: var(--packing-text); background: transparent;
+}
+#inline-review-demo-v1 .packing-tab[aria-pressed="true"] { color: var(--packing-on-accent); background: var(--packing-accent); }
+#inline-review-demo-v1 .review-feedback { margin-top: 16px; display: grid; gap: 10px; }
+#inline-review-demo-v1 .review-context { overflow-wrap: anywhere; }
+</style>
+<div id="inline-review-demo-v1">
+  <div class="review-stage viz-dotted-background">
+    <section class="packing-app" aria-label="出行清单小程序交互示例">
+      <header class="packing-head">
+        <div class="packing-name">轻装出门</div>
+        <div class="packing-caption">周末短途 · 交互示例</div>
+      </header>
+      <main class="packing-content">
+        <div class="packing-summary" data-summary aria-live="polite">已准备 0 / 3 件</div>
+        <div data-items>
+          <label class="packing-item cursor-interaction" data-item="identity">
+            <input type="checkbox" value="identity"><span>身份证件</span>
+          </label>
+          <label class="packing-item cursor-interaction" data-item="charger">
+            <input type="checkbox" value="charger"><span>充电器</span>
+          </label>
+          <label class="packing-item cursor-interaction" data-item="umbrella">
+            <input type="checkbox" value="umbrella"><span>折叠雨伞</span>
+          </label>
+        </div>
+        <div class="packing-empty" data-empty hidden>还没有已完成的项目</div>
+      </main>
+      <nav class="packing-nav" aria-label="小程序页面">
+        <button type="button" class="packing-tab cursor-interaction" data-page="list" aria-pressed="true">行前清单</button>
+        <button type="button" class="packing-tab cursor-interaction" data-page="done" aria-pressed="false">已完成</button>
+      </nav>
+    </section>
+  </div>
+  <section class="review-feedback" aria-label="UI 修改意见">
+    <label class="form-label" for="inline-review-demo-v1-note">修改意见 · <span data-page-label>行前清单</span> · v1</label>
+    <div class="text-small text-muted review-context" data-context>评论对象：行前清单 · 已准备 0 件</div>
+    <textarea class="form-control" id="inline-review-demo-v1-note" rows="3" maxlength="1200" placeholder="例如：把勾选后的项目移到底部，页面切换按钮再明显一些。"></textarea>
+    <div class="viz-row">
+      <button class="btn btn-primary" type="button" data-send>发送修改意见</button>
+      <span class="text-small text-muted" data-draft-hint>当前页草稿</span>
+    </div>
+    <div class="text-small" data-status role="status" aria-live="polite"></div>
+    <div class="text-small text-destructive" data-error role="alert"></div>
+    <div data-fallback hidden>
+      <label class="form-label">可复制到当前对话
+        <textarea class="form-control" rows="6" readonly data-fallback-text></textarea>
+      </label>
+    </div>
+  </section>
+</div>
+<script>
+/* INLINE_REVIEW_BRIDGE */
+(() => {
+  const root = document.getElementById("inline-review-demo-v1");
+  const meta = {
+    schema: 1,
+    projectId: "inline-ui-review-demo",
+    projectName: "出行清单交互示例",
+    revision: "v1",
+    sourcePath: ""
+  };
+  const bridge = window.InlineReviewBridge.create();
+  const pages = { list: "行前清单", done: "已完成" };
+  const itemIds = ["identity", "charger", "umbrella"];
+  const note = root.querySelector("textarea:not([readonly])");
+  const send = root.querySelector("[data-send]");
+  const status = root.querySelector("[data-status]");
+  const error = root.querySelector("[data-error]");
+  const fallback = root.querySelector("[data-fallback]");
+  let busy = false;
+  let state = { page: "list", completed: [], drafts: {} };
+
+  const completedIds = (value) => Array.isArray(value) ? itemIds.filter(id => value.includes(id)) : [];
+  function normalize(saved) {
+    const data = saved?.privateContent;
+    if (!data || data.schema !== meta.schema || data.projectId !== meta.projectId || data.revision !== meta.revision) return null;
+    const next = { page: Object.hasOwn(pages, data.page) ? data.page : "list", completed: completedIds(data.completed), drafts: {} };
+    for (const page of Object.keys(pages)) {
+      const draft = data.drafts?.[page];
+      if (typeof draft?.text === "string" && draft.text.length <= 1200) {
+        next.drafts[page] = { text: draft.text, completed: completedIds(draft.completed) };
+      }
+    }
+    return next;
+  }
+  function persist() {
+    const snapshot = {
+      modelContent: { projectId: meta.projectId, revision: meta.revision, page: state.page, pageName: pages[state.page], completed: [...state.completed] },
+      privateContent: { schema: meta.schema, projectId: meta.projectId, revision: meta.revision, ...state }
+    };
+    if (new TextEncoder().encode(JSON.stringify(snapshot)).length > 16 * 1024) {
+      root.querySelector("[data-draft-hint]").textContent = "草稿较长，仅保留在当前界面";
+      return;
+    }
+    try {
+      Promise.resolve(bridge.save(snapshot)).catch(() => {
+        root.querySelector("[data-draft-hint]").textContent = "当前界面保留草稿；恢复保存未完成";
+      });
+    } catch {
+      root.querySelector("[data-draft-hint]").textContent = "当前界面保留草稿；恢复保存未完成";
+    }
+  }
+  function renderContext() {
+    const draft = state.drafts[state.page];
+    const context = draft?.text ? draft.completed : state.completed;
+    root.querySelector("[data-context]").textContent = `评论对象：${pages[state.page]} · 已准备 ${context.length} 件${draft?.text ? "（开始填写时）" : ""}`;
+  }
+  function render() {
+    send.textContent = bridge.canSend ? "发送修改意见" : "整理修改意见";
+    root.querySelector("[data-summary]").textContent = state.page === "list" ? `已准备 ${state.completed.length} / 3 件` : `已完成 ${state.completed.length} 件`;
+    for (const row of root.querySelectorAll("[data-item]")) {
+      const checked = state.completed.includes(row.dataset.item);
+      row.querySelector("input").checked = checked;
+      row.hidden = state.page === "done" && !checked;
+      row.style.display = row.hidden ? "none" : "";
+    }
+    root.querySelector("[data-empty]").hidden = state.page !== "done" || state.completed.length > 0;
+    for (const tab of root.querySelectorAll("[data-page]")) tab.setAttribute("aria-pressed", String(tab.dataset.page === state.page));
+    root.querySelector("[data-page-label]").textContent = pages[state.page];
+    const text = state.drafts[state.page]?.text ?? "";
+    if (note.value !== text) note.value = text;
+    renderContext();
+  }
+  function clearMessages() {
+    status.textContent = "";
+    error.textContent = "";
+    fallback.hidden = true;
+  }
+  function rememberNote() {
+    const previous = state.drafts[state.page];
+    state.drafts[state.page] = {
+      text: note.value,
+      completed: previous?.text ? previous.completed : [...state.completed]
+    };
+    renderContext();
+    persist();
+  }
+  note.addEventListener("input", () => { clearMessages(); rememberNote(); });
+  root.querySelector("[data-items]").addEventListener("change", event => {
+    if (!itemIds.includes(event.target.value)) return;
+    state.completed = Array.from(root.querySelectorAll("[data-items] input:checked"), input => input.value);
+    render();
+    persist();
+  });
+  for (const tab of root.querySelectorAll("[data-page]")) {
+    tab.addEventListener("click", () => {
+      state.page = tab.dataset.page;
+      clearMessages();
+      render();
+      persist();
+    });
+  }
+  function feedbackPrompt() {
+    const draft = state.drafts[state.page];
+    return [
+      "请根据以下 UI 修改意见更新对应设计，并再次直接在当前对话里展示可操作界面及下方意见框。",
+      `项目：${meta.projectName}（${meta.projectId}）`,
+      `设计版本：${meta.revision}`,
+      `页面：${pages[state.page]}（${state.page}）`,
+      `意见对应的演示状态：${JSON.stringify({ completed: draft.completed })}`,
+      ...(meta.sourcePath ? [`本轮界面源标识：${meta.sourcePath}`] : []),
+      "",
+      "修改意见原文：",
+      draft.text
+    ].join("\n");
+  }
+  send.addEventListener("click", async () => {
+    if (busy) return;
+    clearMessages();
+    if (!note.value.trim()) {
+      error.textContent = "请先填写修改意见。";
+      note.focus();
+      return;
+    }
+    // Bind any form value written by input methods before calling the host.
+    const previous = state.drafts[state.page];
+    state.drafts[state.page] = { text: note.value, completed: previous?.text ? previous.completed : [...state.completed] };
+    const prompt = feedbackPrompt();
+    if (!bridge.canSend) {
+      error.textContent = "当前环境不支持直接发送；意见已整理，可复制下方内容发到当前对话。";
+      fallback.hidden = false;
+      root.querySelector("[data-fallback-text]").value = prompt;
+      return;
+    }
+    busy = true;
+    send.disabled = true;
+    const submittedPage = state.page;
+    const submittedText = note.value;
+    try {
+      // Call directly from the user gesture: do not await persistence first.
+      await bridge.send({ prompt, title: "发送 UI 修改意见" });
+      if (state.page === submittedPage && note.value === submittedText) {
+        status.textContent = "已请求发送，请留意对话中的确认提示。草稿已保留。";
+      }
+    } catch {
+      if (state.page === submittedPage && note.value === submittedText) {
+        error.textContent = "发送未完成，草稿已保留。可重试或复制下方内容。";
+        fallback.hidden = false;
+        root.querySelector("[data-fallback-text]").value = prompt;
+      }
+    } finally {
+      busy = false;
+      send.disabled = false;
+    }
+  });
+  try { state = normalize(bridge.load()) ?? state; } catch { /* Storage is optional. */ }
+  try {
+    bridge.subscribe(saved => {
+      if (busy || document.activeElement === note) return;
+      const next = normalize(saved);
+      if (!next) return;
+      state = next;
+      render();
+    });
+  } catch { /* A missing subscription must not prevent interaction. */ }
+  render();
+})();
+</script>
